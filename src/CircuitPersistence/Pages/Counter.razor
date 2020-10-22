@@ -1,16 +1,63 @@
+@using CircuitPersistence.Services
 @page "/counter"
+@inject SessionPersistenceCircuitHandler circuitHandler
+@inject IStore store
 
 <h1>Counter</h1>
 
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<br/>
+<h2>Component</h2>
+<p>Current count: @componentCount</p>
+<button class="btn btn-primary" @onclick="IncrementComponentCount">Increment Component</button>
+<hr/>
+<br/>
+<h2>Circuit</h2>
+<p>Current count: @circuitCount</p>
+<button class="btn btn-primary" @onclick="IncrementCircuitCountAsync">Increment Circuit</button>
+<hr/>
+<br/>
+<h2>Session</h2>
+<p>Current count: @sessionCount</p>
+<button class="btn btn-primary" @onclick="IncrementSessionCountAsync">Increment Session</button>
+<hr/>
+<br/>
+<h2>Global</h2>
+<p>Current count: @globalCount</p>
+<button class="btn btn-primary" @onclick="IncrementGlobalCountAsync">Increment Global</button>
 
 @code {
-    private int currentCount = 0;
 
-    private void IncrementCount()
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        circuitCount = Int32.Parse((await store.LoadValueAsync($"{circuitHandler.CircuitId}_count")) ?? "0");
+        sessionCount = Int32.Parse((await store.LoadValueAsync($"{circuitHandler.SessionId}_count")) ?? "0");
+        globalCount = Int32.Parse((await store.LoadValueAsync($"global_count")) ?? "0");
+    }
+
+    private int componentCount = 0;
+    private void IncrementComponentCount()
+    {
+        componentCount++;
+    }
+
+    private int circuitCount = 0;
+    private async Task IncrementCircuitCountAsync()
+    {
+        circuitCount++;
+        await store.SaveValueAsync($"{circuitHandler.CircuitId}_count", circuitCount.ToString());
+    }
+
+    private int sessionCount = 0;
+    private async Task IncrementSessionCountAsync()
+    {
+        sessionCount++;
+        await store.SaveValueAsync($"{circuitHandler.SessionId}_count", sessionCount.ToString());
+    }
+
+    private int globalCount = 0;
+    private async Task IncrementGlobalCountAsync()
+    {
+        globalCount++;
+        await store.SaveValueAsync($"global_count", globalCount.ToString());
     }
 }
