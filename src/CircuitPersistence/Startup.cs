@@ -26,11 +26,14 @@ namespace CircuitPersistence
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
-            // keeps data for the process
-            services.AddSingleton<IStore, InMemoryStore>();
-
             services.AddScoped<SessionPersistenceCircuitHandler>();
             services.AddScoped<CircuitHandler>(ctx => ctx.GetRequiredService<SessionPersistenceCircuitHandler>());
+
+            // keeps data for the process
+            services.AddTransient<IComponentStore, InMemoryStore>();
+            services.AddScoped<IScopeStore, InMemoryStore>();
+            services.AddSingleton<ISingletonStore, InMemoryStore>();
+            services.AddSingleton<ISessionStore, InMemoryStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

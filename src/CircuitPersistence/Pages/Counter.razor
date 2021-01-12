@@ -1,7 +1,11 @@
 @using CircuitPersistence.Services
 @page "/counter"
+
 @inject SessionPersistenceCircuitHandler circuitHandler
-@inject IStore store
+@inject IComponentStore componentStore
+@inject IScopeStore scopeStore
+@inject ISingletonStore singletonStore
+@inject ISessionStore sessionStore
 
 <h1>Counter</h1>
 
@@ -12,52 +16,55 @@
 <hr/>
 <br/>
 <h2>Circuit</h2>
-<p>Current count: @circuitCount</p>
+<p>Current count: @scopeCount</p>
 <button class="btn btn-primary" @onclick="IncrementCircuitCountAsync">Increment Circuit</button>
+<hr/>
+<br/>
+<h2>Global</h2>
+<p>Current count: @singletonCount</p>
+<button class="btn btn-primary" @onclick="IncrementGlobalCountAsync">Increment Global</button>
 <hr/>
 <br/>
 <h2>Session</h2>
 <p>Current count: @sessionCount</p>
 <button class="btn btn-primary" @onclick="IncrementSessionCountAsync">Increment Session</button>
-<hr/>
-<br/>
-<h2>Global</h2>
-<p>Current count: @globalCount</p>
-<button class="btn btn-primary" @onclick="IncrementGlobalCountAsync">Increment Global</button>
 
 @code {
+    const string VALUE = "count";
 
     protected override async Task OnInitializedAsync()
     {
-        circuitCount = Int32.Parse((await store.LoadValueAsync($"{circuitHandler.CircuitId}_count")) ?? "0");
-        sessionCount = Int32.Parse((await store.LoadValueAsync($"{circuitHandler.SessionId}_count")) ?? "0");
-        globalCount = Int32.Parse((await store.LoadValueAsync($"global_count")) ?? "0");
+        componentCount = Int32.Parse((await componentStore.LoadValueAsync(VALUE) ?? "0"));
+        scopeCount = Int32.Parse((await scopeStore.LoadValueAsync(VALUE)) ?? "0");
+        singletonCount = Int32.Parse((await singletonStore.LoadValueAsync(VALUE)) ?? "0");
+        sessionCount = Int32.Parse((await sessionStore.LoadValueAsync($"{circuitHandler.SessionId}_{VALUE}")) ?? "0");
     }
 
     private int componentCount = 0;
-    private void IncrementComponentCount()
+    private async Task IncrementComponentCount()
     {
         componentCount++;
+        await componentStore.SaveValueAsync(VALUE, componentCount.ToString());
     }
 
-    private int circuitCount = 0;
+    private int scopeCount = 0;
     private async Task IncrementCircuitCountAsync()
     {
-        circuitCount++;
-        await store.SaveValueAsync($"{circuitHandler.CircuitId}_count", circuitCount.ToString());
+        scopeCount++;
+        await scopeStore.SaveValueAsync(VALUE, scopeCount.ToString());
+    }
+
+    private int singletonCount = 0;
+    private async Task IncrementGlobalCountAsync()
+    {
+        singletonCount++;
+        await singletonStore.SaveValueAsync(VALUE, singletonCount.ToString());
     }
 
     private int sessionCount = 0;
     private async Task IncrementSessionCountAsync()
     {
         sessionCount++;
-        await store.SaveValueAsync($"{circuitHandler.SessionId}_count", sessionCount.ToString());
-    }
-
-    private int globalCount = 0;
-    private async Task IncrementGlobalCountAsync()
-    {
-        globalCount++;
-        await store.SaveValueAsync($"global_count", globalCount.ToString());
+        await sessionStore.SaveValueAsync($"{circuitHandler.SessionId}_{VALUE}", sessionCount.ToString());
     }
 }

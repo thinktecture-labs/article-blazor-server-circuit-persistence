@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace CircuitPersistence.Services
 {
-    public class InMemoryStore : IStore
+    public class InMemoryStore : ISingletonStore, IScopeStore, IComponentStore, ISessionStore
     {
         private Dictionary<string, string> _store = new Dictionary<string, string>();
 

@@ -20,6 +20,7 @@ namespace CircuitPersistence
             catch (Exception ex)
             {
                 Log.Fatal(ex, "A fatal error caused service to crash");
+                Console.WriteLine("Issue: " + ex.Message);
                 return 1;
             }
             finally

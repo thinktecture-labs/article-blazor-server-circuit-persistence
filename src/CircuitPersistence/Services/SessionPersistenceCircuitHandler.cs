@@ -12,12 +12,12 @@ namespace CircuitPersistence.Services
 		private readonly Guid _instanceId = Guid.NewGuid();
 		private readonly ILogger<SessionPersistenceCircuitHandler> _logger;
 		private readonly IJSRuntime _jsRuntime;
-		private readonly IStore _store;
+		private readonly ISessionStore _store;
 
-        public string CircuitId { get; private set; }
-        public string SessionId { get; private set; }
+		public string CircuitId { get; private set; }
+		public string SessionId { get; private set; }
 
-		public SessionPersistenceCircuitHandler(ILogger<SessionPersistenceCircuitHandler> logger, IJSRuntime jsRuntime, IStore store)
+		public SessionPersistenceCircuitHandler(ILogger<SessionPersistenceCircuitHandler> logger, IJSRuntime jsRuntime, ISessionStore store)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_jsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
@@ -30,7 +30,7 @@ namespace CircuitPersistence.Services
 		{
 			_logger.LogInformation("CircuitHandler {CircuitHandlerId} got {CircuitEvent} for Circuit {CircuitId}", _instanceId, "OPENED", circuit.Id);
 
-            CircuitId = circuit.Id;
+			CircuitId = circuit.Id;
 			SessionId = await GetRemoteSessionIdAsync(cancellationToken);
 			if (!String.IsNullOrEmpty(SessionId))
 			{
